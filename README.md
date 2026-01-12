@@ -41,7 +41,7 @@ We recommend keeping the browser data intact to maintain your sales history.
 ## 🌐 The app link
 👉 Click here to use the app
 
-##📲 Add to Home Screen (For Easy Access)
+## 📲 Add to Home Screen (For Easy Access)
 You can install this app like a native app on your phone! Here's how:
 
 ✅ For iPhone (iOS Safari):
@@ -64,14 +64,14 @@ Tap Add to Home screen.
 
 Confirm by tapping Add.
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 HTML5 & CSS3: For a responsive and clean user interface.
 
 JavaScript (ES6): For logic, calculations, and DOM manipulation.
 
 LocalStorage: For offline data persistence.
 
-##CoffeeMan Mini POS 迷你收银系统
+## CoffeeMan Mini POS 迷你收银系统
 一个简单又美观的网页版收银系统，专为小型咖啡店或摊位设计。轻松管理菜单、处理订单并追踪销售记录。 基于 HTML、CSS 和原生 JavaScript 开发。
 
 ##🚀 功能特点
@@ -89,7 +89,7 @@ LocalStorage: For offline data persistence.
 
 ✅ 本地存储：数据保存在浏览器中（无需账号登录）。
 
-##📱 使用方法
+## 📱 使用方法
 点击 “⚙️ Items” 设置你的菜单商品和价格。
 
 点击左侧的 商品卡片 将其加入当前订单。
@@ -102,19 +102,18 @@ LocalStorage: For offline data persistence.
 
 点击 “VOID” 可清空当前购物车。
 
-##🔐 数据存储与隐私
+## 🔐 数据存储与隐私
 所有数据（菜单和订单）都保存在你设备的本地存储（Local Storage）。
 
 你的数据不会上传到任何地方，完全私密且安全。
 
 如果你清空浏览器缓存或更换设备，数据将会丢失。
 
-##🌐 应用链接
+## 🌐 应用链接
 👉 点击这里即可使用
 
-🛠️ 技术栈
+## 🛠️ 技术栈
 HTML, CSS, JavaScript
-
 LocalStorage（离线数据存储）
 
 ## 🧔 Author
