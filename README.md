@@ -39,7 +39,7 @@ If you clear your browser cache or use a different device/browser, your data wil
 We recommend keeping the browser data intact to maintain your sales history.
 
 ## 🌐 The app link
-👉 Click here to use the app
+👉 (Click here to use the app)[https://coffeemanapp.github.io/minipos/pos.html]
 
 ## 📲 Add to Home Screen (For Easy Access)
 You can install this app like a native app on your phone! Here's how:
@@ -110,7 +110,7 @@ LocalStorage: For offline data persistence.
 如果你清空浏览器缓存或更换设备，数据将会丢失。
 
 ## 🌐 应用链接
-👉 点击这里即可使用
+👉 (点击这里即可使用)[https://coffeemanapp.github.io/minipos/pos.html]
 
 ## 🛠️ 技术栈
 HTML, CSS, JavaScript
