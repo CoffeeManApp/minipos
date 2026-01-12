@@ -1,4 +1,4 @@
-#Coffeeman-mini-pos
+# Coffeeman-mini-pos
 A simple and beautiful web-based Point of Sale (POS) system designed for small coffee shops and kiosks. Manage your menu, process orders, and track history all in one place. Built with HTML, CSS, and Vanilla JavaScript.
 
 ##🚀 Features
@@ -16,7 +16,7 @@ A simple and beautiful web-based Point of Sale (POS) system designed for small c
 
 ✅ Stored Locally: All data is saved in your browser (no database required).
 
-##📱 How to Use
+## 📱 How to Use
 Click "⚙️ Items" to add your coffee products and set their prices.
 
 Click on the Product Cards in the menu to add them to the cart.
@@ -29,7 +29,7 @@ Click "📜 Order History" to view or reprint past orders.
 
 Use "VOID" to clear the current cart and start over.
 
-##🔐 Data Storage & Privacy
+## 🔐 Data Storage & Privacy
 All data (menu and orders) is saved locally on your device using Local Storage.
 
 This means your data stays private and is not uploaded to any server.
@@ -38,7 +38,7 @@ If you clear your browser cache or use a different device/browser, your data wil
 
 We recommend keeping the browser data intact to maintain your sales history.
 
-##🌐 The app link
+## 🌐 The app link
 👉 Click here to use the app
 
 ##📲 Add to Home Screen (For Easy Access)
