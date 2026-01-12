@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoffeeMan mini POS</title>
+    <style>
+        :root {
+            --primary: #3498db; --bg: #ebf5fb; --card: #d6eaf8; --dark: #2c3e50;
+            --success: #27ae60; --danger: #e74c3c;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--dark); height: 100vh; display: flex; flex-direction: column; }
+        
+        header { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .main-container { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; overflow: hidden; }
+
+        @media (max-width: 850px) { .main-container { grid-template-columns: 1fr; overflow-y: auto; } body { height: auto; } }
+
+        /* Left Side: Products */
+        .panel { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--card); overflow-y: auto; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .product-card { background: var(--card); padding: 15px 5px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .product-card:active { background: var(--primary); color: white; }
+
+        /* Right Side: Cart */
+        .cart-list { flex: 1; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; min-height: 150px; }
+        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        
+        .calc-area { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .total-text { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        input { width: 100px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 1rem; }
+
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+        .btn-pay { background: var(--success); color: white; }
+        .btn-clear { background: var(--danger); color: white; }
+        .btn-dark { background: var(--dark); color: white; width: auto; padding: 8px 15px; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+
+        /* Receipt Styling */
+        .receipt { font-family: 'Courier New', Courier, monospace; background: #fff; padding: 20px; border: 1px solid #ddd; color: #000; }
+        .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .receipt-line { display: flex; justify-content: space-between; margin: 3px 0; }
+        .dashed-line { border-bottom: 1px dashed #000; margin: 10px 0; }
+
+        .history-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+        .history-item:hover { background: var(--bg); }
+    </style>
+</head>
+<body>
+
+<header>
+    <span>☕ CoffeeMan mini POS</span>
+    <div>
+        <button class="btn-dark" onclick="showHistory()">📜 Order History</button>
+        <button class="btn-dark" onclick="showMenuManage()">⚙️ Items</button>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="panel">
+        <h3 style="margin-top:0">Coffee Menu</h3>
+        <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <div class="panel" style="display:flex; flex-direction:column;">
+        <h3 style="margin-top:0">Current Order</h3>
+        <div class="cart-list" id="cartList"></div>
+        
+        <div class="calc-area">
+            <div class="row"><span>Total:</span> <span id="gTotal" class="total-text">$0.00</span></div>
+            <div class="row"><span>Cash:</span> <input type="number" id="cashIn" step="0.01" oninput="doMath()"></div>
+            <div class="row" style="color:var(--success); font-weight:bold;"><span>Change:</span> <span id="changeOut">$0.00</span></div>
+        </div>
+
+        <button class="btn btn-pay" onclick="finishOrder()">COMPLETE & PRINT</button>
+        <button class="btn btn-clear" onclick="voidCart()">VOID</button>
+    </div>
+</div>
+
+<div id="histModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Order History</h3>
+        <div id="histList"></div>
+        <button class="btn btn-dark" style="width:100%" onclick="closeModals()">Close</button>
+    </div>
+</div>
+
+<div id="rectModal" class="modal">
+    <div class="modal-content" style="background:#f4f4f4;">
+        <div id="receiptContent" class="receipt"></div>
+        <button class="btn btn-pay" onclick="closeModals()">Done / New Order</button>
+    </div>
+</div>
+
+<div id="menuModal" class="modal">
+    <div class="modal-content">
+        <h3>Manage Menu</h3>
+        <input type="text" id="niName" placeholder="Item Name" style="width:100%; margin-bottom:5px; text-align:left;">
+        <input type="number" id="niPrice" placeholder="Price" style="width:100%; margin-bottom:10px; text-align:left;">
+        <button class="btn btn-pay" onclick="addMenu()">Add Item</button>
+        <div id="mngList" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;"></div>
+        <button class="btn btn-dark" style="width:100%" onclick="closeModals()">Close</button>
+    </div>
+</div>
+
+<script>
+    let menu = JSON.parse(localStorage.getItem('cm_menu')) || [{name:'Black Coffee', price:2.50}, {name:'Latte', price:3.50}];
+    let orders = JSON.parse(localStorage.getItem('cm_orders')) || [];
+    let cart = [];
+    let total = 0;
+
+    function renderMenu() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        menu.forEach((item, i) => {
+            grid.innerHTML += `<div class="product-card" onclick="toCart(${i})"><b>${item.name}</b><br>$${item.price.toFixed(2)}</div>`;
+        });
+        
+        const mng = document.getElementById('mngList');
+        mng.innerHTML = '';
+        menu.forEach((item, i) => {
+            mng.innerHTML += `<div class="row"><span>${item.name}</span><button onclick="delMenu(${i})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></div>`;
+        });
+    }
+
+    function toCart(i) {
+        cart.push({...menu[i]});
+        updateCart();
+    }
+
+    function updateCart() {
+        const list = document.getElementById('cartList');
+        list.innerHTML = '';
+        total = 0;
+        cart.forEach(item => {
+            total += item.price;
+            list.innerHTML += `<div class="cart-item"><span>${item.name}</span><b>$${item.price.toFixed(2)}</b></div>`;
+        });
+        document.getElementById('gTotal').innerText = `$${total.toFixed(2)}`;
+        doMath();
+    }
+
+    function doMath() {
+        const cash = parseFloat(document.getElementById('cashIn').value) || 0;
+        const change = cash - total;
+        document.getElementById('changeOut').innerText = change > 0 ? `$${change.toFixed(2)}` : `$0.00`;
+    }
+
+    function finishOrder() {
+        const cash = parseFloat(document.getElementById('cashIn').value) || 0;
+        if(cart.length === 0) return;
+        if(cash < total) return alert("Insufficient cash!");
+
+        const newOrder = {
+            id: orders.length + 1001,
+            date: new Date().toLocaleString(),
+            items: [...cart],
+            total: total,
+            cash: cash,
+            change: cash - total
+        };
+
+        orders.push(newOrder);
+        localStorage.setItem('cm_orders', JSON.stringify(orders));
+        showReceipt(newOrder);
+        voidCart();
+    }
+
+    function voidCart() {
+        cart = [];
+        document.getElementById('cashIn').value = '';
+        updateCart();
+    }
+
+    function showReceipt(order) {
+        const rect = document.getElementById('receiptContent');
+        let itemsHtml = '';
+        order.items.forEach(item => {
+            itemsHtml += `<div class="receipt-line"><span>${item.name}</span><span>$${item.price.toFixed(2)}</span></div>`;
+        });
+
+        rect.innerHTML = `
+            <div class="receipt-header">
+                <strong>COFFEEMAN MINI POS</strong><br>
+                Order #${order.id}<br>
+                <small>${order.date}</small>
+            </div>
+            ${itemsHtml}
+            <div class="dashed-line"></div>
+            <div class="receipt-line"><strong>TOTAL</strong><strong>$${order.total.toFixed(2)}</strong></div>
+            <div class="receipt-line"><span>Cash</span><span>$${order.cash.toFixed(2)}</span></div>
+            <div class="receipt-line"><span>Change</span><span>$${order.change.toFixed(2)}</span></div>
+            <div class="dashed-line"></div>
+            <center>Thank you for your visit!</center>
+        `;
+        document.getElementById('rectModal').style.display = 'flex';
+    }
+
+    function showHistory() {
+        const list = document.getElementById('histList');
+        list.innerHTML = orders.length === 0 ? 'No orders yet.' : '';
+        orders.slice().reverse().forEach(o => {
+            list.innerHTML += `
+                <div class="history-item" onclick="viewOldReceipt(${o.id})">
+                    <div><strong>#${o.id}</strong><br><small>${o.date}</small></div>
+                    <strong>$${o.total.toFixed(2)}</strong>
+                </div>`;
+        });
+        document.getElementById('histModal').style.display = 'flex';
+    }
+
+    function viewOldReceipt(id) {
+        const order = orders.find(o => o.id === id);
+        showReceipt(order);
+    }
+
+    function showMenuManage() { document.getElementById('menuModal').style.display = 'flex'; }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+
+    function addMenu() {
+        const n = document.getElementById('niName').value;
+        const p = parseFloat(document.getElementById('niPrice').value);
+        if(n && p) {
+            menu.push({name:n, price:p});
+            localStorage.setItem('cm_menu', JSON.stringify(menu));
+            renderMenu();
+            document.getElementById('niName').value = '';
+            document.getElementById('niPrice').value = '';
+        }
+    }
+
+    function delMenu(i) {
+        menu.splice(i, 1);
+        localStorage.setItem('cm_menu', JSON.stringify(menu));
+        renderMenu();
+    }
+
+    renderMenu();
+</script>
+</body>
+</html>
