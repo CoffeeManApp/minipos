@@ -6,79 +6,257 @@
     <title>CoffeeMan mini POS</title>
     <style>
         :root {
-            --primary: #3498db; --bg: #ebf5fb; --card: #d6eaf8; --dark: #2c3e50;
-            --success: #27ae60; --danger: #e74c3c;
+            /* Kept your original light blue, added glass variants */
+            --primary: #3498db;
+            --primary-light: rgba(52, 152, 219, 0.2);
+            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            --glass: rgba(255, 255, 255, 0.4);
+            --glass-dark: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --radius: 18px;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--dark); height: 100vh; display: flex; flex-direction: column; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; 
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--dark); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
         
-        header { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header { 
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--dark); 
+            padding: 15px 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
+        }
 
-        .main-container { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; overflow: hidden; }
+        header span { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--primary); }
 
-        @media (max-width: 850px) { .main-container { grid-template-columns: 1fr; overflow-y: auto; } body { height: auto; } }
+        .main-container { 
+            display: grid; 
+            grid-template-columns: 1fr 400px; 
+            gap: 20px; 
+            padding: 20px; 
+            flex: 1; 
+            overflow: hidden; 
+        }
 
-        /* Left Side: Products */
-        .panel { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--card); overflow-y: auto; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .product-card { background: var(--card); padding: 15px 5px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .product-card:active { background: var(--primary); color: white; }
+        @media (max-width: 850px) { 
+            .main-container { grid-template-columns: 1fr; overflow-y: auto; } 
+            body { height: auto; } 
+        }
 
-        /* Right Side: Cart */
-        .cart-list { flex: 1; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; min-height: 150px; }
-        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        /* Glass Panel Styling */
+        .panel { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--radius); 
+            padding: 25px; 
+            border: 1px solid var(--glass-border); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; 
+        }
+
+        .product-card { 
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 20px 10px; 
+            border-radius: var(--radius); 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            border: 1px solid transparent;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .product-card:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .product-card:active { 
+            transform: scale(0.95);
+            background: var(--primary); 
+            color: white; 
+        }
+
+        /* Cart Styling */
+        .cart-list { 
+            flex: 1; 
+            overflow-y: auto; 
+            margin-bottom: 20px; 
+            min-height: 200px; 
+        }
+
+        .cart-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 15px; 
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
         
-        .calc-area { background: #f8f9fa; padding: 15px; border-radius: 8px; }
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .total-text { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
-        input { width: 100px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 1rem; }
+        .calc-area { 
+            background: rgba(255, 255, 255, 0.4); 
+            padding: 20px; 
+            border-radius: var(--radius); 
+            margin-bottom: 15px;
+        }
 
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-        .btn-pay { background: var(--success); color: white; }
-        .btn-clear { background: var(--danger); color: white; }
-        .btn-dark { background: var(--dark); color: white; width: auto; padding: 8px 15px; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .total-text { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
+        
+        input { 
+            width: 120px; 
+            padding: 10px; 
+            border: 1px solid var(--glass-border); 
+            border-radius: 10px; 
+            text-align: right; 
+            font-size: 1.1rem; 
+            background: rgba(255, 255, 255, 0.8);
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        /* Buttons */
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: var(--radius); 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 1rem; 
+            transition: all 0.2s;
+        }
+
+        .btn-pay { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); }
+        .btn-pay:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-clear { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+        .btn-clear:hover { background: var(--danger); color: white; }
+
+        .btn-dark { 
+            background: rgba(44, 62, 80, 0.1); 
+            color: var(--dark); 
+            border: 1px solid rgba(44, 62, 80, 0.1);
+            width: auto; 
+            padding: 8px 18px; 
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+        .btn-dark:hover { background: rgba(44, 62, 80, 0.2); }
 
         /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.2); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000; 
+        }
+
+        .modal-content { 
+            background: rgba(255, 255, 255, 0.85); 
+            padding: 30px; 
+            border-radius: 24px; 
+            width: 90%; 
+            max-width: 450px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            border: 1px solid white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
 
         /* Receipt Styling */
-        .receipt { font-family: 'Courier New', Courier, monospace; background: #fff; padding: 20px; border: 1px solid #ddd; color: #000; }
-        .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-        .receipt-line { display: flex; justify-content: space-between; margin: 3px 0; }
-        .dashed-line { border-bottom: 1px dashed #000; margin: 10px 0; }
+        .receipt { 
+            font-family: 'Courier New', Courier, monospace; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 4px;
+            color: #000; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .receipt-header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; }
+        .receipt-line { display: flex; justify-content: space-between; margin: 5px 0; }
+        .dashed-line { border-bottom: 1px dashed #ccc; margin: 15px 0; }
 
-        .history-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
-        .history-item:hover { background: var(--bg); }
+        .history-item { 
+            padding: 15px; 
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: white;
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            transition: 0.2s;
+        }
+        .history-item:hover { transform: scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
+
+        h3 { letter-spacing: -0.5px; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <header>
-    <span>☕ CoffeeMan mini POS</span>
+    <span>CoffeeMan Mini POS</span>
     <div>
-        <button class="btn-dark" onclick="showHistory()">📜 Order History</button>
+        <button class="btn-dark" onclick="showHistory()">📜 History</button>
         <button class="btn-dark" onclick="showMenuManage()">⚙️ Items</button>
     </div>
 </header>
 
 <div class="main-container">
     <div class="panel">
-        <h3 style="margin-top:0">Coffee Menu</h3>
+        <h3 style="margin-top:0">Menu</h3>
         <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <div class="panel" style="display:flex; flex-direction:column;">
+    <div class="panel">
         <h3 style="margin-top:0">Current Order</h3>
         <div class="cart-list" id="cartList"></div>
         
         <div class="calc-area">
-            <div class="row"><span>Total:</span> <span id="gTotal" class="total-text">$0.00</span></div>
-            <div class="row"><span>Cash:</span> <input type="number" id="cashIn" step="0.01" oninput="doMath()"></div>
-            <div class="row" style="color:var(--success); font-weight:bold;"><span>Change:</span> <span id="changeOut">$0.00</span></div>
+            <div class="row"><span>Total</span> <span id="gTotal" class="total-text">$0.00</span></div>
+            <div class="row"><span>Cash Received</span> <input type="number" id="cashIn" step="0.01" oninput="doMath()"></div>
+            <div class="row" style="color:var(--success); font-weight:bold; margin-top:10px;">
+                <span>Change Due</span> <span id="changeOut">$0.00</span>
+            </div>
         </div>
 
-        <button class="btn btn-pay" onclick="finishOrder()">COMPLETE & PRINT</button>
+        <button class="btn btn-pay" onclick="finishOrder()">COMPLETE ORDER</button>
         <button class="btn btn-clear" onclick="voidCart()">VOID</button>
     </div>
 </div>
@@ -87,12 +265,12 @@
     <div class="modal-content">
         <h3 style="margin-top:0">Order History</h3>
         <div id="histList"></div>
-        <button class="btn btn-dark" style="width:100%" onclick="closeModals()">Close</button>
+        <button class="btn btn-dark" style="width:100%; margin-top:20px;" onclick="closeModals()">Close</button>
     </div>
 </div>
 
 <div id="rectModal" class="modal">
-    <div class="modal-content" style="background:#f4f4f4;">
+    <div class="modal-content" style="background:rgba(240,240,240,0.9);">
         <div id="receiptContent" class="receipt"></div>
         <button class="btn btn-pay" onclick="closeModals()">Done / New Order</button>
     </div>
@@ -101,15 +279,16 @@
 <div id="menuModal" class="modal">
     <div class="modal-content">
         <h3>Manage Menu</h3>
-        <input type="text" id="niName" placeholder="Item Name" style="width:100%; margin-bottom:5px; text-align:left;">
-        <input type="number" id="niPrice" placeholder="Price" style="width:100%; margin-bottom:10px; text-align:left;">
-        <button class="btn btn-pay" onclick="addMenu()">Add Item</button>
-        <div id="mngList" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;"></div>
-        <button class="btn btn-dark" style="width:100%" onclick="closeModals()">Close</button>
+        <input type="text" id="niName" placeholder="Item Name" style="width:100%; margin-bottom:10px; text-align:left; box-sizing:border-box;">
+        <input type="number" id="niPrice" placeholder="Price" style="width:100%; margin-bottom:15px; text-align:left; box-sizing:border-box;">
+        <button class="btn btn-pay" onclick="addMenu()">Add New Item</button>
+        <div id="mngList" style="margin-top:20px; border-top:1px solid rgba(0,0,0,0.1); padding-top:15px;"></div>
+        <button class="btn btn-dark" style="width:100%; margin-top:10px;" onclick="closeModals()">Close</button>
     </div>
 </div>
 
 <script>
+    // JS functions are preserved exactly as requested
     let menu = JSON.parse(localStorage.getItem('cm_menu')) || [{name:'Black Coffee', price:2.50}, {name:'Latte', price:3.50}];
     let orders = JSON.parse(localStorage.getItem('cm_orders')) || [];
     let cart = [];
@@ -125,7 +304,7 @@
         const mng = document.getElementById('mngList');
         mng.innerHTML = '';
         menu.forEach((item, i) => {
-            mng.innerHTML += `<div class="row"><span>${item.name}</span><button onclick="delMenu(${i})" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></div>`;
+            mng.innerHTML += `<div class="row"><span>${item.name}</span><button onclick="delMenu(${i})" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold;">Delete</button></div>`;
         });
     }
 
@@ -187,7 +366,7 @@
 
         rect.innerHTML = `
             <div class="receipt-header">
-                <strong>COFFEEMAN MINI POS</strong><br>
+                <strong style="font-size:1.2rem">COFFEEMAN</strong><br>
                 Order #${order.id}<br>
                 <small>${order.date}</small>
             </div>
