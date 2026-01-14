@@ -1,4 +1,4 @@
-# Coffeeman-mini-pos
+# Coffeeman Mini POS
 A simple and beautiful web-based Point of Sale (POS) system designed for small coffee shops and kiosks. Manage your menu, process orders, and track history all in one place. Built with HTML, CSS, and Vanilla JavaScript.
 
 ##🚀 Features
