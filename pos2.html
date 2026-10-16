@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Boss POS - Light/Dark</title>
+<style>
+:root{
+  --bg:#0f0f0f;--card:#1e1e1e;--card2:#2a2a2a;--accent:#ffcc00;
+  --text:#fff;--muted:#999;--border:#2a2a2a;--input:#111
+}
+[data-theme="light"]{
+  --bg:#f5f3ef;--card:#ffffff;--card2:#efebe4;--accent:#7a4a2e;
+  --text:#1a1a1a;--muted:#8a7d6b;--border:#e8e0d6;--input:#fff
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto}
+body{background:var(--bg);color:var(--text);padding-bottom:115px;transition:background 0.3s,color 0.3s}
+header{position:sticky;top:0;z-index:10;background:var(--bg);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.btn{border:0;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+[data-theme="dark"].btn-primary, :root.btn-primary{color:#000}[data-theme="light"].btn-primary{color:#fff}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.prod{background:var(--card);border-radius:16px;padding:12px;text-align:left;border:1px solid var(--border);transition:all 0.2s}
+.prod:active{transform:scale(0.97)}
+.prod h3{font-size:14px;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod p{color:var(--accent);font-weight:800}
+.cat-bar{display:flex;gap:8px;overflow:auto;padding:8px 12px}
+.cat-bar button{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap}
+.cat-bar button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:12px 16px;border-radius:24px 24px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,0.15)}
+.cart-items{max-height:140px;overflow:auto;margin-bottom:8px}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.qty{display:flex;gap:8px;align-items:center}
+.qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text)}
+.total-row{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin:8px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;place-items:center;z-index:20;padding:16px}
+.modal.show{display:grid}
+.modal-box{background:var(--card);width:100%;max-width:400px;border-radius:20px;padding:20px;border:1px solid var(--border)}
+.modal-box input,.modal-box select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input);color:var(--text);margin:8px 0}
+.theme-btn{font-size:20px;background:var(--card2);border:1px solid var(--border);width:40px;height:40px;border-radius:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>● BOSS POS</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    <button class="btn btn-ghost" style="font-size:12px" onclick="openHistory()">📋 Sales</button>
+    <button class="btn btn-primary" style="font-size:12px" onclick="openAdd()">+ Product</button>
+  </div>
+</header>
+
+<div class="cat-bar" id="catBar"></div>
+<div class="grid" id="grid"></div>
+
+<div class="cart-bar">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b id="cartCount">0 items</b><span style="color:var(--muted);font-size:13px" onclick="clearCart()">Clear</span></div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="total-row"><span>Total</span><span id="total">RM 0.00</span></div>
+  <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px" onclick="checkout()">Checkout & Print Receipt</button>
+</div>
+
+<div class="modal" id="addModal"><div class="modal-box">
+  <h3 id="modalTitle">Add Product</h3>
+  <input id="pName" placeholder="Product name"><input id="pPrice" type="number" step="0.01" placeholder="Price">
+  <select id="pCat"><option>Drinks</option><option>Food</option><option>Other</option></select>
+  <div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-ghost" style="flex:1" onclick="closeAdd()">Cancel</button><button class="btn btn-primary" style="flex:1" onclick="saveProduct()">Save</button></div>
+</div></div>
+
+<div class="modal" id="histModal"><div class="modal-box">
+  <div style="display:flex;justify-content:space-between"><h3>Sales Today</h3><button onclick="closeHistory()" style="background:none;border:0;font-size:20px;color:var(--text)">✕</button></div>
+  <p id="todayTotal" style="color:var(--accent);margin:8px 0;font-weight:700"></p><div id="historyList"></div>
+</div></div>
+
+<script>
+// Theme logic
+function getTheme(){return localStorage.getItem('boss_theme')|| (window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark')}
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('boss_theme',t);document.getElementById('themeBtn').innerText=t==='light'?'🌙':'☀️'}
+function toggleTheme(){applyTheme(getTheme()==='light'?'dark':'light')}
+applyTheme(getTheme());
+
+// POS logic (same as before)
+let products=JSON.parse(localStorage.getItem('boss_products')||'null')||[{id:1,name:"Kopi O",price:3.5,cat:"Drinks"},{id:2,name:"Kopi Susu",price:4.5,cat:"Drinks"},{id:3,name:"Nasi Lemak",price:8,cat:"Food"},{id:4,name:"Roti Canai",price:2.5,cat:"Food"}];
+let cart=JSON.parse(localStorage.getItem('boss_cart')||'[]');let orders=JSON.parse(localStorage.getItem('boss_orders')||'[]');let activeCat='All',editId=null;
+function save(){localStorage.setItem('boss_products',JSON.stringify(products));localStorage.setItem('boss_cart',JSON.stringify(cart));localStorage.setItem('boss_orders',JSON.stringify(orders));}
+function renderCats(){const cats=['All',...new Set(products.map(p=>p.cat))];document.getElementById('catBar').innerHTML=cats.map(c=>`<button class="${c===activeCat?'active':''}" onclick="activeCat='${c}';render()">${c}</button>`).join('');}
+function render(){renderCats();const f=activeCat==='All'?products:products.filter(p=>p.cat===activeCat);document.getElementById('grid').innerHTML=f.map(p=>`<div class="prod" onclick="addToCart(${p.id})" oncontextmenu="event.preventDefault();editProduct(${p.id})"><div style="height:70px;background:var(--card2);border-radius:10px;display:grid;place-items:center;font-size:28px">☕</div><h3>${p.name}</h3><p>RM ${p.price.toFixed(2)}</p></div>`).join('');renderCart();}
+function renderCart(){const list=document.getElementById('cartItems');list.innerHTML=cart.length?cart.map((c,i)=>`<div class="cart-row"><span>${c.name}</span><span class="qty"><button onclick="changeQty(${i},-1)">-</button>${c.qty}<button onclick="changeQty(${i},1)">+</button> RM ${(c.price*c.qty).toFixed(2)}</span></div>`).join(''):`<p style="color:var(--muted);text-align:center;padding:10px">Tap products to add</p>`;const total=cart.reduce((s,c)=>s+c.price*c.qty,0);document.getElementById('total').innerText='RM '+total.toFixed(2);document.getElementById('cartCount').innerText=cart.reduce((s,c)=>s+c.qty,0)+' items';}
+function addToCart(id){const p=products.find(x=>x.id===id);const ex=cart.find(x=>x.id===id);if(ex)ex.qty++;else cart.push({...p,qty:1});save();renderCart();}
+function changeQty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);save();renderCart();}
+function clearCart(){cart=[];save();renderCart();}
+function checkout(){if(!cart.length)return alert('Cart empty');const total=cart.reduce((s,c)=>s+c.price*c.qty,0);orders.unshift({id:Date.now(),time:new Date().toLocaleString(),total});save();clearCart();alert('Paid RM '+total.toFixed(2)+' - Receipt printed!');render();}
+function openAdd(){editId=null;document.getElementById('addModal').classList.add('show');}
+function closeAdd(){document.getElementById('addModal').classList.remove('show');}
+function saveProduct(){const name=document.getElementById('pName').value.trim(),price=parseFloat(document.getElementById('pPrice').value),cat=document.getElementById('pCat').value;if(!name||!price)return alert('Name & price required');if(editId){const p=products.find(x=>x.id===editId);p.name=name;p.price=price;p.cat=cat;}else products.push({id:Date.now(),name,price,cat});save();render();closeAdd();}
+function editProduct(id){const p=products.find(x=>x.id===id);if(confirm('Delete '+p.name+'?')){products=products.filter(x=>x.id!==id);save();render();}}
+function openHistory(){document.getElementById('histModal').classList.add('show');document.getElementById('todayTotal').innerText='Total: RM '+orders.reduce((s,o)=>s+o.total,0).toFixed(2);document.getElementById('historyList').innerHTML=orders.map(o=>`<div style="display:flex;justify-content:space-between;padding:10px;background:var(--card2);border-radius:10px;margin-bottom:6px"><span>${o.time}</span><b>RM ${o.total.toFixed(2)}</b></div>`).join('')||'No sales';}
+function closeHistory(){document.getElementById('histModal').classList.remove('show');}
+render();
+</script>
+</body>
+</html>
