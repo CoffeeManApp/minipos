@@ -226,6 +226,32 @@
         .history-item:hover { transform: scale(1.02); box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
 
         h3 { letter-spacing: -0.5px; font-weight: 700; }
+        
+/* Trip.com Affiliate Advertisement */
+.ad-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    margin: 0 20px 20px;
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.ad-container iframe {
+    display: block;
+    max-width: 100%;
+    border: none;
+}
+
+@media (max-width: 500px) {
+    .ad-container iframe {
+        width: 100%;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -285,6 +311,19 @@
         <div id="mngList" style="margin-top:20px; border-top:1px solid rgba(0,0,0,0.1); padding-top:15px;"></div>
         <button class="btn btn-dark" style="width:100%; margin-top:10px;" onclick="closeModals()">Close</button>
     </div>
+</div>
+
+<!-- Trip.com Affiliate Advertisement -->
+<div class="ad-container">
+    <iframe
+        src="https://www.trip.com/partners/ad/DB20485425?Allianceid=3821620&amp;SID=21714802&amp;trip_sub1="
+        width="468"
+        height="60"
+        frameborder="0"
+        scrolling="no"
+        title="Trip.com travel advertisement"
+        id="DB20485425">
+    </iframe>
 </div>
 
 <script>
