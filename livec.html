@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live Photo Converter</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--b1:#cfe0ff;--b2:#f1d3ff;--b3:#c9f3ff;--glass:rgba(255,255,255,.5);--glass2:rgba(255,255,255,.35);--pill:rgba(255,255,255,.9);--tx:#1d1d1f;--mut:#555660;--ac:#0a84ff;--bd:rgba(255,255,255,.75);--sh:0 10px 40px rgba(60,70,160,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--b1:#0a1330;--b2:#26123d;--b3:#08303a;--glass:rgba(44,44,54,.45);--glass2:rgba(255,255,255,.08);--pill:rgba(255,255,255,.2);--tx:#f5f5f7;--mut:#a5a5ae;--bd:rgba(255,255,255,.16);--sh:0 10px 40px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{--b1:#0a1330;--b2:#26123d;--b3:#08303a;--glass:rgba(44,44,54,.45);--glass2:rgba(255,255,255,.08);--pill:rgba(255,255,255,.2);--tx:#f5f5f7;--mut:#a5a5ae;--bd:rgba(255,255,255,.16);--sh:0 10px 40px rgba(0,0,0,.5);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,var(--b1),var(--b2) 55%,var(--b3)) fixed;color:var(--tx);font:16px/1.45 -apple-system,system-ui,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(40vmax 40vmax at 15% 10%,rgba(10,132,255,.35),transparent 60%),radial-gradient(35vmax 35vmax at 90% 30%,rgba(255,55,155,.28),transparent 60%),radial-gradient(45vmax 45vmax at 40% 100%,rgba(48,209,200,.3),transparent 60%)}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:30px;letter-spacing:-.02em;margin:10px 4px 16px;font-weight:700}
+.tabs{display:flex;gap:2px;background:var(--glass2);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--bd);border-radius:999px;padding:4px;margin-bottom:16px;box-shadow:var(--sh)}
+.tabs button{flex:1;border:0;background:none;color:var(--mut);padding:10px 8px;border-radius:999px;font:inherit;font-size:15px;font-weight:600;transition:all .25s}
+.tabs button.on{background:var(--pill);color:var(--tx);box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--bd);border-radius:28px;padding:18px;margin-bottom:14px;box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.45)}
+.hide{display:none}
+video{width:100%;max-height:50vh;border-radius:20px;background:#000;margin-top:12px;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=file]{width:100%;padding:12px 0 4px;color:var(--mut);font:inherit;font-size:14px}
+input[type=file]::file-selector-button{border:1px solid var(--bd);background:var(--glass2);color:var(--ac);border-radius:999px;padding:9px 16px;margin-right:10px;font:inherit;font-weight:600}
+.btn,button.p{display:block;width:100%;text-align:center;box-sizing:border-box;background:linear-gradient(180deg,#4aa3ff,#0a84ff);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:14px;font:inherit;font-weight:600;margin-top:12px;text-decoration:none;box-shadow:0 6px 20px rgba(10,132,255,.4),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.s{background:var(--glass2);color:var(--ac);border:1px solid var(--bd);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.btn:active,button.p:active{transform:scale(.98)}
+.mut{color:var(--mut);font-size:14px;padding:0 6px}
+.err{color:#ff453a}
+</style></head><body><main>
+<h1>Live Photo Converter</h1>
+<div class="tabs"><button id="t1" class="on">Video → Live Photo</button><button id="t2">Live Photo → Video</button></div>
+
+<section id="p1">
+ <div class="card">
+  <label>Choose a short video (.mp4 / .mov, H.264 or HEVC)</label>
+  <input type="file" id="f1" accept="video/mp4,video/quicktime,.mp4,.mov,.m4v">
+  <div id="w1" class="hide">
+   <video id="v1" controls playsinline muted></video>
+   <p class="mut" style="margin:10px 0 0">Key photo frame: <b id="k1">0.00s</b></p>
+   <input type="range" id="r1" min="0" max="1" step="0.01" value="0">
+   <button class="p" id="go">Create Live Photo</button>
+   <div id="o1"></div>
+  </div>
+ </div>
+ <p class="mut">You get a JPG and a MOV with the same name and a shared Live Photo ID. Import both together (same names) — e.g. Photos on a Mac, then sync, or AirDrop the pair from a Mac to your iPhone. iOS doesn’t let websites write Live Photos straight into your library.</p>
+</section>
+
+<section id="p2" class="hide">
+ <div class="card">
+  <label>Choose the Live Photo’s video (.mov)</label>
+  <input type="file" id="f2" accept="video/quicktime,video/mp4,.mov,.mp4">
+  <div id="w2" class="hide">
+   <video id="v2" controls playsinline></video>
+   <div id="o2"></div>
+  </div>
+ </div>
+ <p class="mut">Browsers on iPhone only hand over the still part of a Live Photo, so pick the .mov from an exported pair. Tip: on iPhone you can also use Photos → Share → Save as Video.</p>
+</section>
+
+<script>
+const $=s=>document.querySelector(s),enc=new TextEncoder(),z=n=>new Uint8Array(n);
+const cat=(...a)=>{let n=0;a.forEach(x=>n+=x.length);const o=new Uint8Array(n);let p=0;a.forEach(x=>{o.set(x,p);p+=x.length});return o};
+const u32=v=>new Uint8Array([v>>>24&255,v>>>16&255,v>>>8&255,v&255]),u16=v=>new Uint8Array([v>>8&255,v&255]);
+const box=(t,...p)=>{const b=cat(...p);return cat(u32(b.length+8),typeof t=='string'?enc.encode(t):t,b)};
+const fbox=(t,...p)=>box(t,u32(0),...p);
+
+function kids(d,s,e){const dv=new DataView(d.buffer,d.byteOffset),r=[];
+ while(s+8<=e){let sz=dv.getUint32(s),h=8;const t=String.fromCharCode(...d.subarray(s+4,s+8));
+  if(sz==1){sz=Number(dv.getBigUint64(s+8));h=16}else if(sz==0)sz=e-s;
+  if(sz<h)break;r.push({t,s,e:s+sz,h});s+=sz}return r}
+
+function patch(d,s,e,sh){const dv=new DataView(d.buffer,d.byteOffset);
+ for(const b of kids(d,s,e)){
+  if(['trak','mdia','minf','stbl'].includes(b.t))patch(d,b.s+b.h,b.e,sh);
+  else if(b.t=='stco'){const n=dv.getUint32(b.s+12);for(let i=0;i<n;i++){const p=b.s+16+i*4;dv.setUint32(p,dv.getUint32(p)+sh)}}
+  else if(b.t=='co64'){const n=dv.getUint32(b.s+12);for(let i=0;i<n;i++){const p=b.s+16+i*8;dv.setBigUint64(p,dv.getBigUint64(p)+BigInt(sh))}}}}
+
+function makeLiveMov(src,id,tSec){
+ const d=new Uint8Array(src),top=kids(d,0,d.length);
+ const moov=top.find(b=>b.t=='moov'),mdat=top.find(b=>b.t=='mdat');
+ if(!moov||!mdat)throw Error('Not a valid MP4/MOV file');
+ const mv=d.slice(moov.s,moov.e),dv=new DataView(mv.buffer);
+ const mvhd=kids(mv,8,mv.length).find(b=>b.t=='mvhd'),p=mvhd.s+8,v=mv[p];
+ const ts=dv.getUint32(p+(v?20:12)),dur=dv.getUint32(p+(v?28:16)),np=p+(v?108:96),tid=dv.getUint32(np);
+ dv.setUint32(np,tid+1);
+ // movie-level metadata: content identifier + still-image-time
+ const K1='com.apple.quicktime.content.identifier',K2='com.apple.quicktime.still-image-time';
+ const item=(i,ty,val)=>box(u32(i),box('data',u32(ty),u32(0),val));
+ const meta=fbox('meta',fbox('hdlr',u32(0),enc.encode('mdta'),z(12),z(1)),
+  fbox('keys',u32(2),box('mdta',enc.encode(K1)),box('mdta',enc.encode(K2))),
+  box('ilst',item(1,1,enc.encode(id)),item(2,65,new Uint8Array([255]))));
+ // timed metadata track holding the still-image-time sample
+ const t0=Math.min(Math.round(tSec*ts),Math.max(dur-1,0)),sd=Math.max(dur-t0,1);
+ const mx=cat(u32(0x10000),z(12),u32(0x10000),z(12),u32(0x40000000));
+ const edts=t0>0?box('edts',fbox('elst',u32(2),u32(t0),u32(0xFFFFFFFF),u32(0x10000),u32(sd),u32(0),u32(0x10000))):z(0);
+ const stsd=fbox('stsd',u32(1),box('mebx',z(6),u16(1),box('keys',box(u32(1),
+  box('keyd',enc.encode('mdta'),enc.encode(K2)),box('dtyp',u32(0),u32(65))))));
+ const trak=box('trak',
+  box('tkhd',u32(3),z(8),u32(tid),z(4),u32(dur),z(8),z(8),mx,z(8)),edts,
+  box('mdia',fbox('mdhd',z(8),u32(ts),u32(sd),u16(0x55c4),u16(0)),
+   fbox('hdlr',u32(0),enc.encode('mdta'),z(12),z(1)),
+   box('minf',fbox('nmhd'),box('dinf',fbox('dref',u32(1),box('url ',u32(1)))),
+    box('stbl',stsd,fbox('stts',u32(1),u32(1),u32(sd)),fbox('stsc',u32(1),u32(1),u32(1),u32(1)),
+     fbox('stsz',u32(9),u32(1)),fbox('stco',u32(1),u32(0))))));
+ const ftyp=box('ftyp',enc.encode('qt  '),u32(0),enc.encode('qt  '));
+ const moovLen=mv.length+meta.length+trak.length;
+ let pos=ftyp.length,shift=0,seen=false;
+ for(const b of top){if(b.t=='ftyp')continue;if(b.t=='mdat'&&!seen){seen=true;shift=pos-b.s}
+  pos+=b.t=='moov'?moovLen:b.e-b.s}
+ patch(mv,8,mv.length,shift);
+ new DataView(trak.buffer).setUint32(trak.length-4,pos+8);
+ const newMoov=box('moov',mv.subarray(8),meta,trak);
+ const parts=[ftyp];
+ for(const b of top){if(b.t=='ftyp')continue;parts.push(b.t=='moov'?newMoov:d.subarray(b.s,b.e))}
+ parts.push(box('mdat',u32(9),u32(1),new Uint8Array([0])));
+ return new Blob(parts,{type:'video/quicktime'});
+}
+
+function makeJpeg(jpg,id){
+ const mn=cat(enc.encode('Apple iOS\0'),new Uint8Array([0,1,0x4d,0x4d]),u16(1),u16(0x11),u16(2),u32(37),u32(32),u32(0),enc.encode(id+'\0'));
+ const tiff=cat(enc.encode('MM'),u16(42),u32(8),u16(1),u16(0x8769),u16(4),u32(1),u32(26),u32(0),
+  u16(1),u16(0x927c),u16(7),u32(mn.length),u32(44),u32(0),mn);
+ const app=cat(enc.encode('Exif\0\0'),tiff);
+ return cat(jpg.subarray(0,2),new Uint8Array([0xff,0xe1]),u16(app.length+2),app,jpg.subarray(2));
+}
+
+const seek=(v,t)=>new Promise(r=>{v.onseeked=()=>r();v.currentTime=t});
+async function frame(v){const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;
+ c.getContext('2d').drawImage(v,0,0);
+ return new Uint8Array(await new Promise(r=>c.toBlob(async b=>r(await b.arrayBuffer()),'image/jpeg',.95)))}
+function link(box,blob,name,label,sec){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+ a.className='btn'+(sec?' s':'');a.textContent=label;box.appendChild(a)}
+
+// tabs
+for(const n of [1,2])$('#t'+n).onclick=()=>{for(const m of [1,2]){$('#t'+m).classList.toggle('on',m==n);$('#p'+m).classList.toggle('hide',m!=n)}};
+
+// video -> live photo
+let file1;
+$('#f1').onchange=e=>{file1=e.target.files[0];if(!file1)return;const v=$('#v1');v.src=URL.createObjectURL(file1);
+ $('#w1').classList.remove('hide');$('#o1').innerHTML='';
+ v.onloadedmetadata=()=>{$('#r1').max=v.duration;$('#r1').value=0;$('#k1').textContent='0.00s'}};
+$('#r1').oninput=e=>{$('#v1').currentTime=+e.target.value;$('#k1').textContent=(+e.target.value).toFixed(2)+'s'};
+$('#go').onclick=async()=>{const o=$('#o1');o.innerHTML='<p class="mut">Working…</p>';
+ try{const v=$('#v1'),t=+$('#r1').value,id=crypto.randomUUID().toUpperCase(),base='IMG_'+Math.floor(1000+Math.random()*9000);
+  await seek(v,t);const jpg=makeJpeg(await frame(v),id);
+  const mov=makeLiveMov(await file1.arrayBuffer(),id,t);
+  o.innerHTML='<p class="mut">Done. Save both files:</p>';
+  link(o,new Blob([jpg],{type:'image/jpeg'}),base+'.JPG','Download '+base+'.JPG');
+  link(o,mov,base+'.MOV','Download '+base+'.MOV');
+ }catch(err){o.innerHTML='<p class="err">'+err.message+'</p>'}};
+
+// live photo -> video
+let file2;
+$('#f2').onchange=e=>{file2=e.target.files[0];if(!file2)return;const v=$('#v2'),o=$('#o2'),base=file2.name.replace(/\.[^.]+$/,'');
+ v.src=URL.createObjectURL(file2);$('#w2').classList.remove('hide');o.innerHTML='';
+ link(o,new Blob([file2],{type:'video/mp4'}),base+'.mp4','Download as MP4');
+ const b=document.createElement('button');b.className='p btn s';b.textContent='Save current frame as JPG';
+ b.onclick=async()=>{const j=await frame(v);const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([j],{type:'image/jpeg'}));a.download=base+'-frame.jpg';a.click()};
+ o.appendChild(b)};
+</script></main></body></html>
