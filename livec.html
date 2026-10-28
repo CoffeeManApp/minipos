@@ -145,7 +145,10 @@ $('#go').onclick=async()=>{const o=$('#o1');o.innerHTML='<p class="mut">Workingâ
   const mov=makeLiveMov(await file1.arrayBuffer(),id,t);
   o.innerHTML='<p class="mut">Done. Save both files:</p>';
   link(o,new Blob([jpg],{type:'image/jpeg'}),base+'.JPG','Download '+base+'.JPG');
-  link(o,mov,base+'.MOV','Download '+base+'.MOV');
+    link(o,mov,base+'.MOV','Download '+base+'.MOV');
+  const fj=new File([jpg],base+'.JPG',{type:'image/jpeg'}),fm=new File([mov],base+'.MOV',{type:'video/quicktime'});
+  if(navigator.canShare&&navigator.canShare({files:[fj,fm]})){const s=document.createElement('button');s.className='p';s.textContent='Save as Live Photo (one tap)';
+   s.onclick=()=>navigator.share({files:[fj,fm]}).catch(()=>{});o.insertBefore(s,o.children[1])}
  }catch(err){o.innerHTML='<p class="err">'+err.message+'</p>'}};
 
 // live photo -> video
